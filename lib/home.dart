@@ -1,16 +1,8 @@
-import 'dart:io' as io;
-import 'dart:io';
-import 'dart:ui';
-
 import 'package:autozoom/imageViewer.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:google_mlkit_object_detection/google_mlkit_object_detection.dart';
-import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
 import 'cameraview.dart';
-import 'painters/object_detector_painter.dart';
 
 class ObjectDetectorView extends StatefulWidget {
   @override
@@ -19,22 +11,14 @@ class ObjectDetectorView extends StatefulWidget {
 
 class _ObjectDetectorView extends State<ObjectDetectorView> {
   late ObjectDetector _objectDetector;
-  bool _canProcess = false;
-  bool _isBusy = false;
   CustomPaint? _customPaint;
   String? _text;
   CameraImage ?_image;
-
-  @override
-  void initState() {
-    super.initState();
-
-    // _initializeDetector(DetectionMode.stream);
-  }
+  bool isViewing=false;
 
   @override
   void dispose() {
-    _canProcess = false;
+    // _canProcess = false;
     _objectDetector.close();
     super.dispose();
   }
@@ -49,7 +33,8 @@ class _ObjectDetectorView extends State<ObjectDetectorView> {
             text: _text,
             onImage: (inputImage) async{
 
-
+              // print(inputImage.height);
+              // print(inputImage.width);
               _image=inputImage;
              // var img=await decodeImageFromList(inputImage.);
              // print(inputImage.height);
@@ -57,7 +42,7 @@ class _ObjectDetectorView extends State<ObjectDetectorView> {
 
               // processImage(inputImage);
             },
-            onScreenModeChanged: (image){},
+            // onScreenModeChanged: (image){},
             initialDirection: CameraLensDirection.back,
           ),
         Positioned(
@@ -65,16 +50,23 @@ class _ObjectDetectorView extends State<ObjectDetectorView> {
             child:  MaterialButton(
               color: Colors.blue,
                 onPressed: () {
-
+                  if(_image!=null){
+                  //   isViewing=true;
+                  //   setState(() {});
+                  // }
                   Navigator.push(context, MaterialPageRoute(builder: (context)=>
                       ImageViewer(image: _image!)));
+              }
+                  else {
+                    print('no image');
+                  }
                 }
             ),
         )
       ],
     );
-
   }
+
 
   // void _onScreenModeChanged(ScreenMode mode) {
   //   switch (mode) {
@@ -158,18 +150,18 @@ class _ObjectDetectorView extends State<ObjectDetectorView> {
   //   }
   // }
 
-  Future<String> _getModel(String assetPath) async {
-    if (io.Platform.isAndroid) {
-      return 'flutter_assets/$assetPath';
-    }
-    final path = '${(await getApplicationSupportDirectory()).path}/$assetPath';
-    await io.Directory(dirname(path)).create(recursive: true);
-    final file = File(path);
-    if (!await file.exists()) {
-      final byteData = await rootBundle.load(assetPath);
-      await file.writeAsBytes(byteData.buffer
-          .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
-    }
-    return file.path;
-  }
+  // Future<String> _getModel(String assetPath) async {
+  //   if (io.Platform.isAndroid) {
+  //     return 'flutter_assets/$assetPath';
+  //   }
+  //   final path = '${(await getApplicationSupportDirectory()).path}/$assetPath';
+  //   await io.Directory(dirname(path)).create(recursive: true);
+  //   final file = File(path);
+  //   if (!await file.exists()) {
+  //     final byteData = await rootBundle.load(assetPath);
+  //     await file.writeAsBytes(byteData.buffer
+  //         .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
+  //   }
+  //   return file.path;
+  // }
 }

@@ -51,6 +51,7 @@ dev_dependencies:
   image_picker:
   bitmap:
   image:
+  zoom_widget: ^2.0.1
 
 #    git:
 #      url: https://github.com/filofan1/tflite_flutter_helper.git
