@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../main.dart';
+import 'camera_view_singleton.dart';
 
 // enum ScreenMode { liveFeed }
 
@@ -39,8 +40,6 @@ class _CameraViewState extends State<CameraView> {
   @override
   void initState() {
     super.initState();
-
-    // _imagePicker = ImagePicker();
 
     if (cameras!.any(
           (element) =>
@@ -248,6 +247,17 @@ class _CameraViewState extends State<CameraView> {
       _controller?.startImageStream(_processCameraImage);
       setState(() {});
     });
+    // _imagePicker = ImagePicker();
+    Size? previewSize = _controller!.value.previewSize;
+
+    /// previewSize is size of raw input image to the model
+    CameraViewSingleton.inputImageSize = previewSize;
+
+    // the display width of image on screen is
+    // same as screenWidth while maintaining the aspectRatio
+    Size screenSize = MediaQuery.of(context).size;
+    CameraViewSingleton.screenSize = screenSize;
+    CameraViewSingleton.ratio = screenSize.width / previewSize!.height;
   }
 
   Future _stopLiveFeed() async {

@@ -1,3 +1,4 @@
+//@dart=2.9
 import 'dart:typed_data';
 import 'dart:ui';
 import 'package:camera/camera.dart';
@@ -8,9 +9,9 @@ import 'package:autozoom/main.dart';
 import 'package:google_mlkit_object_detection/google_mlkit_object_detection.dart';
 
 
-List<int>? convertImagetoPng(CameraImage image)  {
+List<int> convertImagetoPng(CameraImage image)  {
   try {
-    imglib.Image? img;
+    imglib.Image img;
     if (image.format.group == ImageFormatGroup.yuv420) {
       img = _convertYUV420(image);
     } else if (image.format.group == ImageFormatGroup.bgra8888) {
@@ -20,7 +21,7 @@ List<int>? convertImagetoPng(CameraImage image)  {
     imglib.PngEncoder pngEncoder = new imglib.PngEncoder();
 
     // Convert to png
-    List<int> png = pngEncoder.encode(img!);
+    List<int> png = pngEncoder.encodeImage(img);
     return png;
   } catch (e) {
     print(">>>>>>>>>>>> ERROR:" + e.toString());
@@ -32,10 +33,10 @@ List<int>? convertImagetoPng(CameraImage image)  {
 // Color
 imglib.Image _convertBGRA8888(CameraImage image) {
   return imglib.Image.fromBytes(
-    width: image.width,
-    height: image.height,
-    bytes: image.planes[0].bytes.buffer,
-    format: imglib.Format.uint8,
+     image.width,
+    image.height,
+    image.planes[0].bytes,
+    format: imglib.Format.bgra,
   );
 }
 
@@ -43,7 +44,7 @@ imglib.Image _convertBGRA8888(CameraImage image) {
 // Black
 imglib.Image _convertYUV420(CameraImage image) {
   var img = imglib.Image(
-      width: image.width, height: image.height); // Create Image buffer
+       image.width,image.height); // Create Image buffer
 
   Plane plane = image.planes[0];
   const int shift = (0xFF << 24);
@@ -71,14 +72,14 @@ Uint8List convertCameraImage(CameraImage image, Size size, Rect box) {
   int width = image.width;
   int height = image.height;
 // imglib -> Image package from https://pub.dartlang.org/packages/image
-  var img = imglib.Image(width: width, height: height); // Create Image buffer
+  var img = imglib.Image(width, height); // Create Image buffer
   const int hexFF = 0xFF << 24;
   final int uvyButtonStride = image.planes[1].bytesPerRow;
-  final int? uvPixelStride = image.planes[1].bytesPerPixel;
+  final int uvPixelStride = image.planes[1].bytesPerPixel;
   for (int x = 0; x < width; x++) {
     for (int y = 0; y < height; y++) {
       final int uvIndex =
-          uvPixelStride! * (x / 2).floor() + uvyButtonStride * (y / 2).floor();
+          uvPixelStride * (x / 2).floor() + uvyButtonStride * (y / 2).floor();
       final int index = y * width + x;
       final yp = image.planes[0].bytes[index];
       final up = image.planes[1].bytes[uvIndex];
@@ -95,11 +96,11 @@ Uint8List convertCameraImage(CameraImage image, Size size, Rect box) {
     }
   }
 // Rotate 90 degrees to upright
-  var img1 = imglib.copyRotate(img, angle: 90);
+  var img1 = imglib.copyRotate(img, 90);
   double mediaHeight = size.height;
   imglib.Image fullImage = imglib.copyResize(img1,
       height: mediaHeight.round());
-  fullImage=imglib.copyCrop(fullImage, x: box.left.toInt(), y: box.top.toInt(), width: box.width.toInt(), height: box.height.toInt());
+  fullImage=imglib.copyCrop(fullImage,  box.left.toInt(), box.top.toInt(), box.width.toInt(),  box.height.toInt());
   var _snapShot = imglib.encodePng(fullImage);
   // setState(() {_showSnapshot = true;});
   // Future.delayed(const Duration(seconds: 4), () {
@@ -118,7 +119,7 @@ Future processCameraImage(CameraImage image) async {
   final Size imageSize =
   Size(image.width.toDouble(), image.height.toDouble());
 
-  final camera = cameras![0];
+  final camera = cameras[0];
   final imageRotation =
   InputImageRotationValue.fromRawValue(camera.sensorOrientation);
   if (imageRotation == null) return;
